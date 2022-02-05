@@ -9,7 +9,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        savedInstanceState?.let {
+        if (savedInstanceState == null) {
             supportFragmentManager.commit {
                 add(R.id.container, ContainerFragment())
             }
