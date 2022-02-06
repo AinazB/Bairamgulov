@@ -31,7 +31,6 @@ class ContainerFragment : Fragment() {
     private fun setupPagerWithTabLayout() {
         adapter = FragmentAdapter(childFragmentManager, lifecycle)
         binding.gifsViewpager.adapter = adapter
-        Toast.makeText(activity, "asdasdad", Toast.LENGTH_SHORT).show()
 
         binding.tabLayout.apply {
             addTab(newTab().setText("Последние"))

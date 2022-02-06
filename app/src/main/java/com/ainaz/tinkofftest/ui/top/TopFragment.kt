@@ -11,14 +11,18 @@ import com.ainaz.tinkofftest.App
 import com.ainaz.tinkofftest.R
 import com.ainaz.tinkofftest.databinding.FragmentTopBinding
 import com.ainaz.tinkofftest.domain.usecase.GetTopGifsUseCase
+import com.ainaz.tinkofftest.ui.adapter.GifLoadStateAdapter
 import com.ainaz.tinkofftest.ui.latest.GifsAdapter
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class TopFragment : Fragment(R.layout.fragment_top) {
 
     private var _binding: FragmentTopBinding? = null
     private val binding get() = _binding!!
+    private lateinit var mainLoadStateHolder: GifLoadStateAdapter.Holder
 
     @Inject
     lateinit var getTopGifs: GetTopGifsUseCase
@@ -45,11 +49,21 @@ class TopFragment : Fragment(R.layout.fragment_top) {
     private fun setupList() {
         val adapter = GifsAdapter()
         binding.topRv.adapter = adapter
+        mainLoadStateHolder = GifLoadStateAdapter.Holder(
+            binding.loadStateView
+        ) { adapter.retry() }
+        observeLoadState(adapter)
         PagerSnapHelper().attachToRecyclerView(binding.topRv)
         lifecycleScope.launchWhenStarted {
             getTopGifs().collectLatest {
                 adapter.submitData(it)
             }
+        }
+    }
+
+    private fun observeLoadState(adapter: GifsAdapter) = lifecycleScope.launch {
+        adapter.loadStateFlow.debounce(200).collectLatest { state ->
+            mainLoadStateHolder.bind(state.refresh)
         }
     }
 }

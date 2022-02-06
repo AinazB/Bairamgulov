@@ -11,13 +11,17 @@ import com.ainaz.tinkofftest.App
 import com.ainaz.tinkofftest.R
 import com.ainaz.tinkofftest.databinding.FragmentHotBinding
 import com.ainaz.tinkofftest.domain.usecase.GetHotGifsUseCase
+import com.ainaz.tinkofftest.ui.adapter.GifLoadStateAdapter
 import com.ainaz.tinkofftest.ui.latest.GifsAdapter
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class HotFragment : Fragment(R.layout.fragment_hot) {
     private var _binding: FragmentHotBinding? = null
     private val binding get() = _binding!!
+    private lateinit var mainLoadStateHolder: GifLoadStateAdapter.Holder
 
     @Inject
     lateinit var getHotGifs: GetHotGifsUseCase
@@ -44,11 +48,21 @@ class HotFragment : Fragment(R.layout.fragment_hot) {
     private fun setupList() {
         val adapter = GifsAdapter()
         binding.hotRv.adapter = adapter
+        mainLoadStateHolder = GifLoadStateAdapter.Holder(
+            binding.loadStateView
+        ) { adapter.retry() }
+        observeLoadState(adapter)
         PagerSnapHelper().attachToRecyclerView(binding.hotRv)
         lifecycleScope.launchWhenStarted {
             getHotGifs().collectLatest {
                 adapter.submitData(it)
             }
+        }
+    }
+
+    private fun observeLoadState(adapter: GifsAdapter) = lifecycleScope.launch {
+        adapter.loadStateFlow.debounce(200).collectLatest { state ->
+            mainLoadStateHolder.bind(state.refresh)
         }
     }
 }

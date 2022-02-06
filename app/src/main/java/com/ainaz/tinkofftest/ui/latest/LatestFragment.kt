@@ -10,12 +10,16 @@ import androidx.recyclerview.widget.PagerSnapHelper
 import com.ainaz.tinkofftest.App
 import com.ainaz.tinkofftest.databinding.FragmentLatestBinding
 import com.ainaz.tinkofftest.domain.usecase.GetLatestGifsUseCase
+import com.ainaz.tinkofftest.ui.adapter.GifLoadStateAdapter
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class LatestFragment : Fragment() {
     private var _binding: FragmentLatestBinding? = null
     private val binding get() = _binding!!
+    private lateinit var mainLoadStateHolder: GifLoadStateAdapter.Holder
 
     @Inject
     lateinit var getLatestGifs: GetLatestGifsUseCase
@@ -42,6 +46,10 @@ class LatestFragment : Fragment() {
     private fun setupList() {
         val adapter = GifsAdapter()
         binding.latestRv.adapter = adapter
+        mainLoadStateHolder = GifLoadStateAdapter.Holder(
+            binding.loadStateView
+        ) { adapter.retry() }
+        observeLoadState(adapter)
         PagerSnapHelper().attachToRecyclerView(binding.latestRv)
         lifecycleScope.launchWhenStarted {
             getLatestGifs().collectLatest {
@@ -49,4 +57,11 @@ class LatestFragment : Fragment() {
             }
         }
     }
+
+    private fun observeLoadState(adapter: GifsAdapter) = lifecycleScope.launch {
+        adapter.loadStateFlow.debounce(200).collectLatest { state ->
+            mainLoadStateHolder.bind(state.refresh)
+        }
+    }
+
 }
