@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.PagerSnapHelper
 import com.ainaz.tinkofftest.App
 import com.ainaz.tinkofftest.R
 import com.ainaz.tinkofftest.databinding.FragmentTopBinding
@@ -44,6 +45,7 @@ class TopFragment : Fragment(R.layout.fragment_top) {
     private fun setupList() {
         val adapter = GifsAdapter()
         binding.topRv.adapter = adapter
+        PagerSnapHelper().attachToRecyclerView(binding.topRv)
         lifecycleScope.launchWhenStarted {
             getTopGifs().collectLatest {
                 adapter.submitData(it)

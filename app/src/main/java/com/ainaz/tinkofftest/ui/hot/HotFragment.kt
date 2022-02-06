@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.PagerSnapHelper
 import com.ainaz.tinkofftest.App
 import com.ainaz.tinkofftest.R
 import com.ainaz.tinkofftest.databinding.FragmentHotBinding
@@ -43,6 +44,7 @@ class HotFragment : Fragment(R.layout.fragment_hot) {
     private fun setupList() {
         val adapter = GifsAdapter()
         binding.hotRv.adapter = adapter
+        PagerSnapHelper().attachToRecyclerView(binding.hotRv)
         lifecycleScope.launchWhenStarted {
             getHotGifs().collectLatest {
                 adapter.submitData(it)

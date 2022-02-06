@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.PagerSnapHelper
 import com.ainaz.tinkofftest.App
 import com.ainaz.tinkofftest.databinding.FragmentLatestBinding
 import com.ainaz.tinkofftest.domain.usecase.GetLatestGifsUseCase
@@ -41,6 +42,7 @@ class LatestFragment : Fragment() {
     private fun setupList() {
         val adapter = GifsAdapter()
         binding.latestRv.adapter = adapter
+        PagerSnapHelper().attachToRecyclerView(binding.latestRv)
         lifecycleScope.launchWhenStarted {
             getLatestGifs().collectLatest {
                 adapter.submitData(it)
