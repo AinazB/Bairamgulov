@@ -16,7 +16,10 @@ class GifsAdapter : PagingDataAdapter<Gif, GifsAdapter.Holder>(GifsDiffCallback(
 
     override fun onBindViewHolder(holder: Holder, position: Int) {
         with(holder.binding) {
-            getItem(position)?.let { loadGif(gifIv, it.gifUrl) }
+            getItem(position)?.let {
+                loadGif(gifIv, it.gifUrl)
+                description.text = it.description
+            }
         }
     }
 
